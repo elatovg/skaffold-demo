@@ -1,0 +1,41 @@
+steps:
+- id: 'Pull-docker-image'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', 'gcr.io/$PROJECT_ID/flask:latest']
+
+- id: 'Build-Docker-Image'
+  waitFor: ['Pull-docker-image']
+  name: 'gcr.io/cloud-builders/docker'
+  dir: 'src/flask'
+  args: ['build',
+         '-t', 'gcr.io/$PROJECT_ID/flask:$SHORT_SHA',
+         '-t', 'gcr.io/$PROJECT_ID/flask:latest',
+         '--cache-from', 'gcr.io/$PROJECT_ID/flask:latest',
+         '-f', 'Dockerfile',
+         '.']
+
+- id: 'Push-the-Docker-Image-to-GCR'
+  waitFor: ['Build-Docker-Image']
+  name: 'gcr.io/cloud-builders/docker'
+  args: [ "push", "gcr.io/$PROJECT_ID/flask:$SHORT_SHA"]
+
+- id: 'Rename-image-hash'
+  waitFor: ['Push-the-Docker-Image-to-GCR']
+  name: 'ubuntu'
+  dir: 'k8s-manifests'
+  args: [ "sed", "-i", "s^image: flask^image: gcr.io/$PROJECT_ID/flask:$SHORT_SHA^g", "flask-deploy.yaml" ]
+
+- id: 'Update-K8S'
+  waitFor: ['Rename-image-hash']
+  name: 'gcr.io/cloud-builders/kubectl'
+  args: ["apply",'-f', 'k8s-manifests']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=${_K8S_ZONE}'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=${_K8S_CLUSTER}'
+
+substitutions:
+  _K8S_ZONE: us-east4-b # default value
+  _K8S_CLUSTER: skaffold # default value
+
+images:
+- 'gcr.io/$PROJECT_ID/flask:latest'
