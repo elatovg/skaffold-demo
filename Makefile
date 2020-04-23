@@ -20,7 +20,7 @@ PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
 cluster:
 	#gcloud container clusters create new-cluster --async
 	gcloud -q container clusters create demo \
-    --num-nodes 1 --verbosity error
+    --num-nodes 1 --verbosity error --zone us-east4-c
 
 .PHONY: run-python
 run-python:
@@ -29,21 +29,21 @@ run-python:
 .PHONY: build-docker
 build-docker:
 	cd src/flask && docker build . -t flask
-	cd -
+	cd ../..
 
 .PHONY: run-docker
 run-docker:
 	docker run --rm -d --name my-flask-app -p 8000:8000 flask
 	sleep 3
 	curl http://localhost:8000
-	docker logs my-flask-app
+	docker logs -f my-flask-app
 
 .PHONY: push-docker
 push-docker:
 	docker tag flask gcr.io/$(PROJECT_ID)/flask
 	gcloud -q auth configure-docker
 	docker push gcr.io/$(PROJECT_ID)/flask
-	gcloud container images list
+	gcloud container images list --repository gcr.io/$(PROJECT_ID) --filter flask
 
 .PHONY: deploy-to-k8s
 deploy-to-k8s:

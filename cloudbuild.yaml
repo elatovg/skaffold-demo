@@ -34,8 +34,8 @@ steps:
   - 'CLOUDSDK_CONTAINER_CLUSTER=${_K8S_CLUSTER}'
 
 substitutions:
-  _K8S_ZONE: us-east4-b # default value
-  _K8S_CLUSTER: skaffold # default value
+  _K8S_ZONE: us-east4-c # default value
+  _K8S_CLUSTER: demo # default value
 
 images:
 - 'gcr.io/$PROJECT_ID/flask:latest'
