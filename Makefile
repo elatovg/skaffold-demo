@@ -19,7 +19,7 @@ PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
 .PHONY: k8s-cluster
 cluster:
 	#gcloud container clusters create new-cluster --async
-	gcloud -q container clusters create new-cluster \
+	gcloud -q container clusters create demo \
     --num-nodes 1 --verbosity error
 
 .PHONY: run-python
@@ -58,7 +58,7 @@ skaffold-deploy:
 
 .PHONY: teardown-gcp
 teardown-gcp:
-	gcloud -q container clusters delete new-cluster --async | true
+	gcloud -q container clusters delete demo --async | true
 	gcloud container images list-tags \
     gcr.io/$(PROJECT_ID)/flask \
     --format="value(tags)" | \
@@ -82,7 +82,7 @@ teardown-k8s:
 
 .PHONY: teardown
 teardown:
-	gcloud -q container clusters delete new-cluster --async | true
+	gcloud -q container clusters delete demo --async | true
 	gcloud container images list-tags \
     gcr.io/$(PROJECT_ID)/flask \
     --format="value(tags)" | \
