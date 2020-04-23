@@ -27,7 +27,9 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./k8s-manifests/**.yaml
+    #- ./k8s-manifests/**.yaml
+    - ./k8s-manifests/flask-deploy.yaml
+    - ./k8s-manifests/flask-svc.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker

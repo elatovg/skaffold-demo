@@ -15,12 +15,13 @@
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
+ZONE = us-east4-c
 
 .PHONY: k8s-cluster
 cluster:
 	#gcloud container clusters create new-cluster --async
 	gcloud -q container clusters create demo \
-    --num-nodes 1 --verbosity error --zone us-east4-c
+    --num-nodes 1 --verbosity error --zone $(ZONE)
 	kubectx demo=.
 
 .PHONY: run-python
@@ -59,7 +60,7 @@ skaffold-deploy:
 
 .PHONY: teardown-gcp
 teardown-gcp:
-	gcloud -q container clusters delete demo --async | true
+	gcloud -q container clusters delete demo --zone $(ZONE) --async | true
 	gcloud container images list-tags \
     gcr.io/$(PROJECT_ID)/flask \
     --format="value(tags)" | \
@@ -70,11 +71,12 @@ teardown-gcp:
 
 .PHONY: teardown-docker
 teardown-docker:
-	docker stop `docker ps -q` | true
-	docker rm `docker ps -a -q` | true
+	#docker stop `docker ps -q` | true
+	#docker rm `docker ps -a -q` | true
+	docker stop my-flask-app | true
+	docker rm my-flask-app | true
 	docker rmi -f `docker images -q flask` | true
 	docker rmi -f `docker images -q gcr.io/$(PROJECT_ID)/flask` | true
-
 
 .PHONY: teardown-k8s
 teardown-k8s:
@@ -83,7 +85,7 @@ teardown-k8s:
 
 .PHONY: teardown
 teardown:
-	gcloud -q container clusters delete demo --async | true
+	gcloud -q container clusters delete demo --zone $(ZONE) --async | true
 	gcloud container images list-tags \
     gcr.io/$(PROJECT_ID)/flask \
     --format="value(tags)" | \
