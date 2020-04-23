@@ -21,6 +21,7 @@ cluster:
 	#gcloud container clusters create new-cluster --async
 	gcloud -q container clusters create demo \
     --num-nodes 1 --verbosity error --zone us-east4-c
+	kubectx demo=.
 
 .PHONY: run-python
 run-python:
