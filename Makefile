@@ -32,6 +32,7 @@ run-python:
 build-docker:
 	cd src/flask && docker build . -t flask
 	cd ../..
+	docker images -q flask
 
 .PHONY: run-docker
 run-docker:
