@@ -18,7 +18,7 @@ def get_status():
 
 @app.route('/')
 def hello_world():
-    return 'Hello Folks, I am containers\n'
+    return 'Hello Folks, I like containers\n'
 
 
 if __name__ == "__main__":
