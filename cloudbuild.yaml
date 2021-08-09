@@ -1,29 +1,29 @@
 steps:
 - id: 'Pull-docker-image'
   name: 'gcr.io/cloud-builders/docker'
-  args: ['pull', '$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:latest']
+  args: ['pull', '${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:latest']
 
 - id: 'Build-Docker-Image'
   waitFor: ['Pull-docker-image']
   name: 'gcr.io/cloud-builders/docker'
   dir: 'src/flask'
   args: ['build',
-         '-t', '$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA',
-         '-t', '$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:latest',
-         '--cache-from', '$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:latest',
+         '-t', '${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA',
+         '-t', '${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:latest',
+         '--cache-from', '${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:latest',
          '-f', 'Dockerfile',
          '.']
 
 - id: 'Push-the-Docker-Image-to-AR'
   waitFor: ['Build-Docker-Image']
   name: 'gcr.io/cloud-builders/docker'
-  args: [ "push", "$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA"]
+  args: [ "push", "${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA"]
 
 - id: 'Rename-image-hash'
   waitFor: ['Push-the-Docker-Image-to-AR']
   name: 'ubuntu'
   dir: 'k8s-manifests'
-  args: [ "sed", "-i", "s^newName: flask^newName: $AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA^g", "kustomization.yaml" ]
+  args: [ "sed", "-i", "s^newName: flask^newName: $${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA^g", "kustomization.yaml" ]
 
 - id: 'Update-K8S'
   waitFor: ['Rename-image-hash']
@@ -39,4 +39,4 @@ substitutions:
   _AR_REGION: us-east4 # default value
 
 images:
-- '$AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:latest'
+- '${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:latest'
