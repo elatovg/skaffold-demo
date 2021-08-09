@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hey
+spec:
+  selector:
+    matchLabels:
+      app: hey
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hey
+    spec:
+      containers:
+      - name: hey
+        args:
+          - "-q"
+          - "5"
+          - "-z"
+          - "5m"
+          - "http://flask-svc:8000"
+        image: williamyeh/hey

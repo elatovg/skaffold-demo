@@ -1,17 +1,23 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flask
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: flask
   template:
     metadata:
       labels:
         app: flask
-        visualize: 'true'
     spec:
       containers:
       - name: flask
         image: flask
         ports:
-        - containerPort: 8000
+          - containerPort: 8000
+        resources:
+          requests:
+            cpu: "100m"
+

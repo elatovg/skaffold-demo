@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 SHELL := /usr/bin/env bash
 PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
 ZONE = us-east4-c
+REGION = us-east4
+REPO_NAME = demo
+FULL_REPO_NAME = $(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(REPO_NAME)/flask
 
 .PHONY: k8s-cluster
 cluster:
@@ -23,6 +26,11 @@ cluster:
 	gcloud -q container clusters create demo \
     --num-nodes 2 --verbosity error --zone $(ZONE)
 	kubectx demo=.
+
+.PHONY: repo
+repo:
+	gcloud -q artifacts repositories create $(REPO_NAME) \
+    --repository-format docker --location $(REGION)
 
 .PHONY: run-python
 run-python:
@@ -43,16 +51,17 @@ run-docker:
 
 .PHONY: push-docker
 push-docker:
-	docker tag flask gcr.io/$(PROJECT_ID)/flask
-	gcloud -q auth configure-docker
-	docker push gcr.io/$(PROJECT_ID)/flask
-	gcloud container images list --repository gcr.io/$(PROJECT_ID) --filter flask
+	docker tag flask $(FULL_REPO_NAME)
+	gcloud -q auth configure-docker $(REGION)-docker.pkg.dev
+	docker push $(FULL_REPO_NAME)
+	gcloud artifacts docker images list \
+	  $(FULL_REPO_NAME) --filter flask
 
 .PHONY: deploy-to-k8s
 deploy-to-k8s:
 	kubectx demo
-	sed "s^image: flask^image: gcr.io/$(PROJECT_ID)/flask^g" \
-    k8s-manifests/flask-deploy.yaml | kubectl apply -f -
+	sed "s^image: flask^image: $(FULL_REPO_NAME)^g" \
+      k8s-manifests/flask-deploy.yaml | kubectl apply -f -
 	kubectl apply -f k8s-manifests/flask-svc.yaml	
 
 .PHONY: skaffold-deploy
@@ -62,13 +71,7 @@ skaffold-deploy:
 .PHONY: teardown-gcp
 teardown-gcp:
 	gcloud -q container clusters delete demo --zone $(ZONE) --async | true
-	gcloud container images list-tags \
-    gcr.io/$(PROJECT_ID)/flask \
-    --format="value(tags)" | \
-    xargs -I {} gcloud container images delete \
-    --force-delete-tags --quiet \
-    gcr.io/$(PROJECT_ID)/flask:{}
-
+	gcloud -q artifacts repositories delete $(REPO_NAME) --location $(REGION)
 
 .PHONY: teardown-docker
 teardown-docker:
@@ -77,7 +80,7 @@ teardown-docker:
 	docker stop my-flask-app | true
 	docker rm my-flask-app | true
 	docker rmi -f `docker images -q flask` | true
-	docker rmi -f `docker images -q gcr.io/$(PROJECT_ID)/flask` | true
+	docker rmi -f `docker images -q $(FULL_REPO_NAME)` | true
 
 .PHONY: teardown-k8s
 teardown-k8s:
@@ -86,16 +89,11 @@ teardown-k8s:
 
 .PHONY: teardown
 teardown:
+	kubectx demo
+	kubectl delete -f k8s-manifests/ | true
 	gcloud -q container clusters delete demo --zone $(ZONE) --async | true
-	gcloud container images list-tags \
-    gcr.io/$(PROJECT_ID)/flask \
-    --format="value(tags)" | \
-    xargs -I {} gcloud container images delete \
-    --force-delete-tags --quiet \
-    gcr.io/$(PROJECT_ID)/flask:{} | true
+	gcloud -q artifacts repositories delete $(REPO_NAME) --location $(REGION) 
 	docker stop `docker ps -q` | true
 	docker rm -f `docker ps -a -q` | true
 	docker rmi -f `docker images -q flask` | true
-	docker rmi -f `docker images -q gcr.io/$(PROJECT_ID)/flask` | true
-	kubectx demo
-	kubectl delete -f k8s-manifests/ | true
+	docker rmi -f `docker images -q $(FULL_REPO_NAME)` | true
