@@ -72,12 +72,12 @@ prep-for-git:
 .PHONY: git-push-tags
 git-push-tags:
 	git tag v1.1
-    git push --tags
+	git push --tags
 
 .PHONY: git-del-tags
 git-del-tags:
 	git tag -d v1.1
-    git push origin :refs/tags/v1.1
+	git push origin :refs/tags/v1.1
 
 .PHONY: skaffold-deploy
 skaffold-deploy:
