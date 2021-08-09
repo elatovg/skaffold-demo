@@ -112,3 +112,5 @@ teardown:
 	docker rm -f `docker ps -a -q` | true
 	docker rmi -f `docker images -q flask` | true
 	docker rmi -f `docker images -q $(FULL_REPO_NAME)` | true
+	git tag -d v1.1
+	git push origin :refs/tags/v1.1
