@@ -69,6 +69,16 @@ prep-for-git:
 	sed -i "" "s^newName: .*^newName: flask^g" \
       k8s-manifests/kustomization.yaml
 
+.PHONY: git-push-tags
+git-push-tags:
+	git tag v1.1
+    git push --tags
+
+.PHONY: git-del-tags
+git-del-tags:
+	git tag -d v1.1
+    git push origin :refs/tags/v1.1
+
 .PHONY: skaffold-deploy
 skaffold-deploy:
 	skaffold dev -d gcr.io/$(PROJECT_ID)

@@ -23,7 +23,7 @@ steps:
   waitFor: ['Push-the-Docker-Image-to-AR']
   name: 'ubuntu'
   dir: 'k8s-manifests'
-  args: [ "sed", "-i", "s^newName: flask^newName: $${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA^g", "kustomization.yaml" ]
+  args: [ "sed", "-i", "s^newName: flask^newName: $_AR_REGION-docker.pkg.dev/$PROJECT_ID/demo/flask:$SHORT_SHA^g", "kustomization.yaml" ]
 
 - id: 'Update-K8S'
   waitFor: ['Rename-image-hash']
