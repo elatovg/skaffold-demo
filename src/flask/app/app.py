@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Simple Flask App to return a string
+and also provide a /status end point
+"""
 from flask import Flask, json, Response
 
 app = Flask(__name__)
@@ -6,18 +10,20 @@ app = Flask(__name__)
 
 @app.route('/status', methods=['GET'])
 def get_status():
+    """ Return HTTP Code 200 """
     data = {
         'status': 'up',
     }
-    js = json.dumps(data)
+    jsn = json.dumps(data)
 
-    resp = Response(js, status=200, mimetype='application/json')
+    resp = Response(jsn, status=200, mimetype='application/json')
 
     return resp
 
 
 @app.route('/')
 def hello_world():
+    """ Return a simple string"""
     return 'Hello Folks, I like containers\n'
 
 

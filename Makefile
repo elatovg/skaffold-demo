@@ -15,8 +15,8 @@
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
-ZONE = us-east4-c
 REGION = us-east4
+ZONE = $(REGION)-c
 REPO_NAME = demo
 FULL_REPO_NAME = $(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(REPO_NAME)/flask
 
@@ -81,7 +81,7 @@ git-del-tags:
 
 .PHONY: skaffold-deploy
 skaffold-deploy:
-	skaffold dev -d gcr.io/$(PROJECT_ID)
+	skaffold dev -d $(FULL_REPO_NAME)
 
 .PHONY: teardown-gcp
 teardown-gcp:
