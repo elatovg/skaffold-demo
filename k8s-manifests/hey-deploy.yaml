@@ -16,8 +16,10 @@ spec:
       - name: hey
         args:
           - "-q"
-          - "5"
+          - "10"
           - "-z"
           - "5m"
+          - "-c"
+          - "15"
           - "http://flask-svc:8000"
         image: williamyeh/hey

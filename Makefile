@@ -60,9 +60,14 @@ push-docker:
 .PHONY: deploy-to-k8s
 deploy-to-k8s:
 	kubectx demo
-	sed "s^image: flask^image: $(FULL_REPO_NAME)^g" \
-      k8s-manifests/flask-deploy.yaml | kubectl apply -f -
-	kubectl apply -f k8s-manifests/flask-svc.yaml	
+	sed -i "" "s^newName: flask^newName: $(FULL_REPO_NAME)^g" \
+      k8s-manifests/kustomization.yaml
+	kubectl apply -k k8s-manifests/
+
+.PHONY: prep-for-git
+prep-for-git:
+	sed -i "" "s^newName: .*^newName: flask^g" \
+      k8s-manifests/kustomization.yaml
 
 .PHONY: skaffold-deploy
 skaffold-deploy:
