@@ -8,4 +8,4 @@ resources:
 
 images:
 - name: flask
-  newName: flask
+  newName: us-east4-docker.pkg.dev/elatov-demo/demo/flask

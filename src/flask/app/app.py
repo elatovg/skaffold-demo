@@ -24,7 +24,7 @@ def get_status():
 @app.route('/')
 def hello_world():
     """ Return a simple string"""
-    return 'Hello Folks, I like containers\n'
+    return 'Hello Folks, I prefer serverless!!!\n'
 
 
 if __name__ == "__main__":
