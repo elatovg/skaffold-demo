@@ -8,4 +8,4 @@ resources:
 
 images:
 - name: flask
-  newName: art.kelatov.pw/anthos/flask:0.0.1
+  newName: flask
